@@ -17,8 +17,8 @@ def extract_item(item):
         item_id = item_url.replace('https://store.steampowered.com/app/', '')
 
         if item_id.isnumeric():
-            address = 'https://store.steampowered.com/api/appdetails?appids=' + item_id + '&filters=price_overview'
-            overview = json.loads(requests.request('GET', address).text)
+            details_url = 'https://store.steampowered.com/api/appdetails?appids=' + item_id + '&filters=price_overview'
+            overview = json.loads(requests.get(details_url).text)
             price_overview = overview[item_id]['data']['price_overview']
             price_discount = price_overview['discount_percent']
             price_original = price_overview['initial_formatted']
@@ -37,7 +37,7 @@ def extract_item_special(item):
 
 class SteamService:
     def __init__(self, min_discount, report_lifespan, report_filepath, sender_email, sender_pass, receivers):
-        self.__data = json.loads(requests.request('GET', 'https://store.steampowered.com/api/featuredcategories').text)
+        self.__data = json.loads(requests.get('https://store.steampowered.com/api/featuredcategories').text)
         self.__email = Email(sender_email, sender_pass, receivers)
         self.__min_discount = min_discount
         self.__report_database = ReportDatabase(report_filepath)
