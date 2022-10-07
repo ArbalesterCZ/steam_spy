@@ -1,10 +1,14 @@
 from datetime import datetime
+from pathlib import Path
 
 
 class ReportDatabase:
     def __init__(self, filepath):
         self.__filepath = filepath
         self.__datetime_format = '%Y-%m-%d,%H:%M:%S'
+        path = Path(filepath)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch(exist_ok=True)
         with open(filepath, 'r') as file:
             self.__reports = [line.rstrip() for line in file]
 
