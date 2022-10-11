@@ -7,9 +7,9 @@ from report_database import ReportDatabase
 
 def extract_item(item):
     item_url = ''
-    price_discount = -1
-    price_original = -1
-    price_final = -1
+    price_discount, price_old, price_new = -1, -1, -1
+    win, mac, linux = False, False, False
+
     props = item['items'][0]
 
     if 'url' in props:
@@ -17,22 +17,32 @@ def extract_item(item):
         item_id = item_url.replace('https://store.steampowered.com/app/', '')
 
         if item_id.isnumeric():
-            details_url = 'https://store.steampowered.com/api/appdetails?appids=' + item_id + '&filters=price_overview'
-            overview = json.loads(requests.get(details_url).text)
-            price_overview = overview[item_id]['data']['price_overview']
-            price_discount = price_overview['discount_percent']
-            price_original = price_overview['initial_formatted']
-            price_final = price_overview['final_formatted']
+            details_url = 'https://store.steampowered.com/api/appdetails?appids=' + item_id
 
-    return props['name'], props['header_image'], item_url, price_discount, price_original, price_final
+            item_price_overview = json.loads(requests.get(details_url + '&filters=price_overview').text)
+            price_overview = item_price_overview[item_id]['data']['price_overview']
+            price_discount = price_overview['discount_percent']
+            price_old = price_overview['initial_formatted']
+            price_new = price_overview['final_formatted']
+
+            item_platforms = json.loads(requests.get(details_url + '&filters=platforms').text)
+            platforms = item_platforms[item_id]['data']['platforms']
+            win = platforms['windows']
+            mac = platforms['mac']
+            linux = platforms['linux']
+
+    return props['name'], props['header_image'], item_url, price_discount, price_old, price_new, win, mac, linux
 
 
 def extract_item_special(item):
-    app_url = 'https://store.steampowered.com/app/' + str(item['id'])
-    price_original = str(item['original_price'] / 100.0) + '€'
-    price_final = str(item['final_price'] / 100.0) + '€'
+    item_url = 'https://store.steampowered.com/app/' + str(item['id'])
+    price_old = str(item['original_price'] / 100.0) + '€'
+    price_new = str(item['final_price'] / 100.0) + '€'
+    win = item['windows_available']
+    mac = item['mac_available']
+    linux = item['linux_available']
 
-    return item['name'], item['header_image'], app_url, item['discount_percent'], price_original, price_final
+    return item['name'], item['header_image'], item_url, item['discount_percent'], price_old, price_new, win, mac, linux
 
 
 class SteamService:
@@ -55,8 +65,8 @@ class SteamService:
         self.__email.send()
 
     def __proces(self, extract_function, item):
-        title, image, url, discount, original_price, final_price = extract_function(item)
+        title, image, url, discount, original_price, final_price, win, mac, linux = extract_function(item)
         app_id = url.replace('https://store.steampowered.com/app/', '')
         if discount >= self.__min_discount and not self.__report_database.exist(app_id):
-            self.__email.add_body(title, image, url, discount, original_price, final_price)
+            self.__email.add_body(title, image, url, discount, original_price, final_price, win, mac, linux)
             self.__report_database.add(app_id)
