@@ -5,10 +5,9 @@ from email.mime.text import MIMEText
 
 
 class Email:
-    def __init__(self, sender_email, sender_password, receivers):
+    def __init__(self, sender_email, sender_password):
         self.__sender_email = sender_email
-        self.__sender_password = sender_password
-        self.__receivers = receivers
+        self.__sender_pass = sender_password
         self.__head = '''
 <!DOCTYPE html>
 <html lang="en">
@@ -42,14 +41,25 @@ class Email:
     def clear_body(self):
         self.__body = ''
 
-    def send(self):
+    def send(self, receivers):
         if self.__body:
             email = MIMEText(self.__head + self.__body + self.__end, 'html')
             email['Subject'] = 'Steam Spy'
-
             with smtplib.SMTP_SSL(host='smtp.gmail.com', port=465, context=ssl.create_default_context()) as server:
-                server.login(self.__sender_email, self.__sender_password)
-                server.sendmail(self.__sender_email, self.__receivers, email.as_string())
+                try:
+                    server.login(self.__sender_email, self.__sender_pass)
+                except smtplib.SMTPAuthenticationError:
+                    print('Invalid email address or password. (' + self.__sender_email + ' ' + self.__sender_pass + ')')
+                else:
+                    try:
+                        server.sendmail(self.__sender_email, receivers, email.as_string())
+                    except smtplib.SMTPRecipientsRefused:
+                        print('The server rejected ALL recipients. ' + str(receivers))
+                    else:
+                        print('Report sent to the following addresses. ' + str(receivers))
+                        return True
+
+        return False
 
     def __add_platforms(self, win, mac, linux):
         self.__body += '<div class="platforms">'

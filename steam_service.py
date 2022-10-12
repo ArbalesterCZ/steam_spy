@@ -46,14 +46,15 @@ def extract_item_special(item):
 
 
 class SteamService:
-    def __init__(self, min_discount, report_lifespan, report_filepath, sender_email, sender_pass, receivers):
+    def __init__(self, min_discount, report_lifespan, report_filepath, sender_email, sender_password):
         self.__data = json.loads(requests.get('https://store.steampowered.com/api/featuredcategories').text)
-        self.__email = Email(sender_email, sender_pass, receivers)
+        self.__email = Email(sender_email, sender_password)
         self.__min_discount = min_discount
         self.__report_database = ReportDatabase(report_filepath)
-        self.__report_database.clear_old(report_lifespan)
+        self.__report_database.remove_old(report_lifespan)
+        self.__new_items = []
 
-    def proces_message(self):
+    def proces_message(self, receivers):
         i = 0
         while str(i) in self.__data:
             self.__proces(extract_item, self.__data[str(i)])
@@ -62,11 +63,13 @@ class SteamService:
         for special_item in self.__data['specials']['items']:
             self.__proces(extract_item_special, special_item)
 
-        self.__email.send()
+        if not self.__email.send(receivers):
+            self.__report_database.remove(self.__new_items)
 
     def __proces(self, extract_function, item):
         title, image, url, discount, original_price, final_price, win, mac, linux = extract_function(item)
-        app_id = url.replace('https://store.steampowered.com/app/', '')
-        if discount >= self.__min_discount and not self.__report_database.exist(app_id):
+        item_id = url.replace('https://store.steampowered.com/app/', '')
+        if discount >= self.__min_discount and not self.__report_database.find(item_id):
             self.__email.add_body(title, image, url, discount, original_price, final_price, win, mac, linux)
-            self.__report_database.add(app_id)
+            self.__report_database.add([item_id])
+            self.__new_items.append(item_id)

@@ -12,28 +12,52 @@ class ReportDatabase:
         with open(filepath, 'r') as file:
             self.__reports = [line.rstrip() for line in file]
 
-    def add(self, app_id):
-        report = datetime.now().strftime(self.__datetime_format) + ' ' + app_id
-        self.__reports.append(report)
+    def add(self, item_id_list):
+        buffer_report = ''
+        for item_id in item_id_list:
+            report = datetime.now().strftime(self.__datetime_format) + ' ' + item_id
+            self.__reports.append(report)
+            buffer_report += report + '\n'
+            print(report + ' [added]')
 
-        with open(self.__filepath, 'a') as file:
-            file.write(report + '\n')
+        if buffer_report:
+            with open(self.__filepath, 'a') as file:
+                file.write(buffer_report)
 
-    def exist(self, app_id):
-        for report in self.__reports:
-            if report.split(' ')[1] == app_id:
-                return True
-
-        return False
-
-    def clear_old(self, lifespan):
+    def remove(self, item_id_list):
         is_modified = False
-        for report in self.__reports:
-            if (datetime.now() - datetime.strptime(report.split(' ')[0], self.__datetime_format)).days > lifespan:
+        for item_id in item_id_list:
+            report = self.find(item_id)
+            if report:
                 self.__reports.remove(report)
+                print(report + ' [removed]')
                 is_modified = True
 
         if is_modified:
-            with open(self.__filepath, 'w') as file:
-                for report in self.__reports:
-                    file.write(report + '\n')
+            self.__rewrite()
+
+    def remove_old(self, lifespan):
+        is_modified = False
+        for report in self.__reports.copy():
+            if (datetime.now() - datetime.strptime(report.split(' ')[0], self.__datetime_format)).days >= lifespan:
+                self.__reports.remove(report)
+                print(report + ' [removed]')
+                is_modified = True
+
+        if is_modified:
+            self.__rewrite()
+
+    def find(self, item_id):
+        for report in self.__reports:
+            if report.split(' ')[1] == item_id:
+                return report
+
+        return ''
+
+    def __rewrite(self):
+        buffer_report = ''
+        for report in self.__reports:
+            buffer_report += report + '\n'
+
+        with open(self.__filepath, 'w') as file:
+            file.write(buffer_report)

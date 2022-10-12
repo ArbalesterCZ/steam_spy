@@ -13,5 +13,5 @@ parser.add_argument('-r', '--receivers', dest='r', required=True, nargs='+', hel
 
 args = parser.parse_args()
 
-steam_service = SteamService(args.d, args.l, args.f, args.s, args.p, args.r)
-steam_service.proces_message()
+steam_service = SteamService(args.d, args.l, args.f, args.s, args.p)
+steam_service.proces_message(args.r)
