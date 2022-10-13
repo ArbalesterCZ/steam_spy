@@ -17,16 +17,9 @@ class ReportDatabase:
 
         print('------' + datetime.now().strftime(self.__datetime_format) + '------')
 
-    def add(self, identifiers):
-        buffer_report = ''
-        for identifier in identifiers:
-            self.__reports[identifier] = datetime.now().strftime(self.__datetime_format)
-            buffer_report += self.__reports[identifier] + ' ' + identifier + '\n'
-            print('(+) ' + identifier)
-
-        if buffer_report:
-            with open(self.__filepath, 'a') as file:
-                file.write(buffer_report)
+    def add(self, identifier):
+        self.__reports[identifier] = datetime.now().strftime(self.__datetime_format)
+        print('(+) ' + identifier)
 
     def remove(self, identifiers):
         self.__remove(identifiers, self.exist)
@@ -40,7 +33,7 @@ class ReportDatabase:
     def is_valid(self, identifier, lifespan):
         return (datetime.now() - datetime.strptime(self.__reports[identifier], self.__datetime_format)).days >= lifespan
 
-    def __rewrite(self):
+    def save(self):
         buffer_report = ''
         for identifier in self.__reports:
             buffer_report += self.__reports[identifier] + ' ' + identifier + '\n'
@@ -48,13 +41,10 @@ class ReportDatabase:
         with open(self.__filepath, 'w') as file:
             file.write(buffer_report)
 
+        print('Database synchronized.')
+
     def __remove(self, identifiers, condition, *con_args):
-        is_modified = False
         for identifier in identifiers:
             if condition(identifier, *con_args):
                 self.__reports.pop(identifier)
                 print('(-) ' + identifier)
-                is_modified = True
-
-        if is_modified:
-            self.__rewrite()

@@ -52,7 +52,6 @@ class SteamService:
         self.__min_discount = min_discount
         self.__report_database = ReportDatabase(report_filepath)
         self.__report_database.remove_invalid(report_lifespan)
-        self.__new_items = []
 
     def proces_message(self, receivers):
         i = 0
@@ -63,13 +62,12 @@ class SteamService:
         for special_item in self.__data['specials']['items']:
             self.__proces(extract_item_special, special_item)
 
-        if not self.__email.send(receivers):
-            self.__report_database.remove(self.__new_items)
+        if self.__email.send(receivers):
+            self.__report_database.save()
 
     def __proces(self, extract_function, item):
         title, image, url, discount, original_price, final_price, win, mac, linux = extract_function(item)
         item_id = url.replace('https://store.steampowered.com/app/', '')
         if discount >= self.__min_discount and not self.__report_database.exist(item_id):
             self.__email.add_body(title, image, url, discount, original_price, final_price, win, mac, linux)
-            self.__report_database.add([item_id])
-            self.__new_items.append(item_id)
+            self.__report_database.add(item_id)
