@@ -29,14 +29,17 @@ class Email:
     </body>
 </html>'''
 
-    def add_body(self, title, preview, url, discount, price_final, price_original, win, mac, linux):
+    def add_body(self, item):
+        item_price_discount = str(item['discount'])
+        item_price_old = str(item['price_old'] / 100.0)
+        item_price_new = str(item['price_new'] / 100.0)
         self.__body += '''
-        <h1><a href="''' + url + '''">''' + title + '''</a></h1>
-        <h2>''' + str(discount) + '''% discount</h2>
-        <h3>''' + price_original + ''' / <span class="off">''' + price_final + '''</span></h3>
+        <h1><a href="''' + item['url'] + '''">''' + item['name'] + '''</a></h1>
+        <h2>''' + item_price_discount + '''% discount</h2>
+        <h3>''' + item_price_new + '''€ / <span class="off">''' + item_price_old + '''€</span></h3>
         '''
-        self.__add_platforms(win, mac, linux)
-        self.__body += '<a href="' + url + '"><img src="' + preview + '" alt="Preview Image"></a>'
+        self.__add_platforms(item['win'], item['mac'], item['linux'])
+        self.__body += '<a href="' + item['url'] + '"><img src="' + item['preview'] + '" alt="Preview Image"></a>'
 
     def clear_body(self):
         self.__body = ''
