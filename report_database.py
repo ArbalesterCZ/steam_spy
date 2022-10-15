@@ -7,13 +7,16 @@ class ReportDatabase:
         self.__reports = {}
         self.__filepath = filepath
         self.__datetime_format = '%Y-%m-%d,%H:%M:%S'
+
         path = Path(filepath)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.touch(exist_ok=True)
-        with open(filepath, 'r') as file:
-            for line in file:
-                line_parts = line.rstrip().split(' ')
-                self.__reports[line_parts[1]] = line_parts[0]
+        if path.exists():
+            with open(filepath, 'r') as file:
+                for line in file:
+                    line_parts = line.rstrip().split(' ')
+                    self.__reports[line_parts[1]] = line_parts[0]
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch(exist_ok=True)
 
         print('------' + datetime.now().strftime(self.__datetime_format) + '------')
 
