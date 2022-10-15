@@ -11,9 +11,11 @@ def extract_item(item):
     props = item['items'][0]
     if 'url' in props:
         result['url'] = props['url']
-        search_number = re.search(r'\d+', result['url'])
-        if search_number:
-            result['id'] = str(search_number.group())
+        result['name'] = props['name']
+        result['preview'] = props['header_image']
+        id_search = re.search(r'\d+', result['url'])
+        if id_search:
+            result['id'] = str(id_search.group())
             url_extend = 'https://store.steampowered.com/api/appdetails?appids=' + result['id']
 
             result['success'] = json.loads(requests.get(url_extend + '&filters=success').text)[result['id']]['success']
@@ -21,8 +23,8 @@ def extract_item(item):
                 item_price_overview = json.loads(requests.get(url_extend + '&filters=price_overview').text)
                 price_overview = item_price_overview[result['id']]['data']['price_overview']
                 result['discount'] = price_overview['discount_percent']
-                result['price_old'] = price_overview['initial_formatted']
-                result['price_new'] = price_overview['final_formatted']
+                result['price_old'] = price_overview['initial']
+                result['price_new'] = price_overview['final']
 
                 item_platforms = json.loads(requests.get(url_extend + '&filters=platforms').text)
                 platforms = item_platforms[result['id']]['data']['platforms']
