@@ -28,12 +28,12 @@ class ReportDatabase:
         self.__remove(identifiers, self.exist)
 
     def remove_invalid(self, lifespan):
-        self.__remove(self.__reports.copy(), self.is_valid, lifespan)
+        self.__remove(self.__reports.copy(), self.is_invalid, lifespan)
 
     def exist(self, identifier):
         return identifier in self.__reports
 
-    def is_valid(self, identifier, lifespan):
+    def is_invalid(self, identifier, lifespan):
         return (datetime.now() - datetime.strptime(self.__reports[identifier], self.__datetime_format)).days >= lifespan
 
     def save(self):
