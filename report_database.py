@@ -37,9 +37,7 @@ class ReportDatabase:
         for identifier in self.__reports:
             buffer_report += self.__reports[identifier] + ' ' + identifier + '\n'
 
-        filepath_parent = self.__filepath.parent
-        if not filepath_parent.exists():
-            filepath_parent.mkdir(parents=True, exist_ok=True)
+        self.__filepath.parent.mkdir(parents=True, exist_ok=True)
 
         with open(self.__filepath, 'w') as file:
             file.write(buffer_report)
