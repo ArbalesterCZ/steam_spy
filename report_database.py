@@ -5,18 +5,14 @@ from pathlib import Path
 class ReportDatabase:
     def __init__(self, filepath):
         self.__reports = {}
-        self.__filepath = filepath
+        self.__filepath = Path(filepath)
         self.__datetime_format = '%Y-%m-%d,%H:%M:%S'
 
-        path = Path(filepath)
-        if path.exists():
-            with open(filepath, 'r') as file:
+        if self.__filepath.is_file():
+            with open(self.__filepath, 'r') as file:
                 for line in file:
                     line_parts = line.rstrip().split(' ')
                     self.__reports[line_parts[1]] = line_parts[0]
-        else:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.touch(exist_ok=True)
 
         print('------' + datetime.now().strftime(self.__datetime_format) + '------')
 
@@ -40,6 +36,10 @@ class ReportDatabase:
         buffer_report = ''
         for identifier in self.__reports:
             buffer_report += self.__reports[identifier] + ' ' + identifier + '\n'
+
+        if not self.__filepath.is_file():
+            self.__filepath.parent.mkdir(parents=True, exist_ok=True)
+            self.__filepath.touch(exist_ok=True)
 
         with open(self.__filepath, 'w') as file:
             file.write(buffer_report)
