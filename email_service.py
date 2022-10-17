@@ -55,11 +55,12 @@ class Email:
                     print('Invalid email address or password. (' + self.__sender_email + ' ' + self.__sender_pass + ')')
                 else:
                     try:
-                        server.sendmail(self.__sender_email, receivers, email.as_string())
+                        response = server.sendmail(self.__sender_email, receivers, email.as_string())
                     except smtplib.SMTPRecipientsRefused:
                         print('The server rejected ALL recipients. ' + str(receivers))
                     else:
-                        print('Report sent to the following addresses. ' + str(receivers))
+                        successful_receivers = [r for r in receivers if r not in list(response)]
+                        print('Report sent to the following addresses. ' + str(successful_receivers))
                         return True
 
         return False
