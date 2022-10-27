@@ -39,10 +39,13 @@ def extract_item_special(item):
     result = {'success': True, 'id': str(item['id']), 'name': item['name'], 'preview': item['header_image']}
 
     if 'apps' in result['preview']:
-        result['url'] = 'https://store.steampowered.com/app/' + result['id']
+        sub_url = 'app'
+    elif 'subs' in result['preview']:
+        sub_url = 'sub'
     else:
-        result['url'] = 'https://store.steampowered.com/bundle/' + result['id']
+        sub_url = 'bundle'
 
+    result['url'] = 'https://store.steampowered.com/' + sub_url + '/' + result['id']
     result['win'] = item['windows_available']
     result['mac'] = item['mac_available']
     result['linux'] = item['linux_available']
