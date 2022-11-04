@@ -15,7 +15,7 @@ def extract_item(item):
         result['preview'] = props['header_image']
         id_search = re.search(r'\d+', result['url'])
         if id_search:
-            result['id'] = str(id_search.group())
+            result['id'] = id_search.group()
             url_extend = 'https://store.steampowered.com/api/appdetails?appids=' + result['id']
 
             result['success'] = json.loads(requests.get(url_extend + '&filters=success').text)[result['id']]['success']
