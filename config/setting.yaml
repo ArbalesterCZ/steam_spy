@@ -1,0 +1,9 @@
+discount: 50
+lifespan: 14
+filepath: 'report_database'
+sender:
+  email: 'sender@gmail.com'
+  password: 'the_sender_password'
+receivers:
+- 'receiver1@gmail.com'
+- 'receiver2@gmail.com'
