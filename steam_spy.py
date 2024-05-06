@@ -1,9 +1,9 @@
-import yaml
+from yaml import safe_load
 from argparse import ArgumentParser
 from steam_service import SteamService
 
 with open('config/setting.yaml', 'r') as file:
-    setting = yaml.safe_load(file)
+    setting = safe_load(file)
 
 parser = ArgumentParser(description=__doc__)
 
